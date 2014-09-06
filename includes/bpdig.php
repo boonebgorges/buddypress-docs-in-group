@@ -80,6 +80,30 @@ function bpdig_get_create_link( $link ) {
 add_filter( 'bp_docs_get_create_link', 'bpdig_get_create_link', 1000 );
 
 /**
+ * Correct tag links
+ */
+function bpdig_get_tag_link_url( $url, $args ) {
+	if ( bp_is_group() ) {
+		$base = bp_get_group_permalink( groups_get_current_group() ) . bp_docs_get_docs_slug() . '/';
+
+		// I HAVE NO IDEA WHAT IS HAPPENING HERE
+		foreach ( $args as $k => $v ) {
+			if ( 'tag' === $k ) {
+				$tag = $v;
+				break;
+			}
+		}
+
+		if ( ! empty( $tag ) ) {
+			$url = add_query_arg( 'bpd_tag', $tag, $base );
+		}
+	}
+
+	return $url;
+}
+add_filter( 'bp_docs_get_tag_link_url', 'bpdig_get_tag_link_url', 100, 2 );
+
+/**
  * Remove the Associated Group and Access Settings sections.
  */
 add_filter( 'bp_docs_allow_associated_group', '__return_false' );
