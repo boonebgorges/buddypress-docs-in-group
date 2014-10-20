@@ -40,7 +40,15 @@ add_action( 'template_redirect', 'bpdig_redirect_away_from_cpt_urls' );
  */
 function bpdig_filter_the_content( $content ) {
 	if ( bp_is_active( 'groups' ) && bp_is_group() ) {
-		$content = get_the_content();
+		if ( function_exists( 'bp_restore_all_filters' ) ) {
+			bp_restore_all_filters( 'the_content' );
+		}
+
+		$content = apply_filters( 'the_content', get_the_content() );
+
+		if ( function_exists( 'bp_remove_all_filters' ) ) {
+			bp_remove_all_filters( 'the_content' );
+		}
 	}
 
 	return $content;
