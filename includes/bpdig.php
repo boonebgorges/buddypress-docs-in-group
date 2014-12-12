@@ -275,14 +275,16 @@ add_action( 'bp_screens', 'bpdig_protect_create_page' );
 /**
  * Force docs to be associated with the current group.
  */
-function bpdig_force_group_association( $doc_id ) {
+function bpdig_force_group_association( $query ) {
+	$doc_id = $query->doc_id;
+
 	if ( ! bp_is_group() ) {
 		return $doc_id;
 	}
 
 	bp_docs_set_associated_group_id( $doc_id, bp_get_current_group_id() );
 }
-add_filter( 'bp_docs_after_save', 'bpdig_force_group_association' );
+add_filter( 'bp_docs_doc_saved', 'bpdig_force_group_association', 5 );
 
 /**
  * Parent dropdown should show only docs in the group.
