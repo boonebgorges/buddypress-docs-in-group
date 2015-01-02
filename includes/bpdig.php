@@ -297,3 +297,16 @@ function bpdig_parent_dropdown_args( $args ) {
 	return $args;
 }
 add_filter( 'bp_docs_parent_dropdown_query_args', 'bpdig_parent_dropdown_args' );
+
+/**
+ * Ensure comments are open when viewing a Doc.
+ */
+function bpdig_comments_open( $open, $post_id ) {
+	$post = get_post( $post_id );
+	if ( ! isset( $post->post_type ) || bp_docs_get_post_type_name() !== $post->post_type ) {
+		return $open;
+	}
+
+	return true;
+}
+add_filter( 'comments_open', 'bpdig_comments_open', 10, 2 );
