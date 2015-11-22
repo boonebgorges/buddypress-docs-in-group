@@ -295,6 +295,21 @@ function bpdig_force_group_association( $query ) {
 	}
 
 	bp_docs_set_associated_group_id( $doc_id, bp_get_current_group_id() );
+
+	// Force the access settings, which will not have been passed in the $_POST.
+	$group = groups_get_current_group();
+	switch ( $group->status ) {
+		case 'private' :
+		case 'hidden' :
+			$access_setting = 'group-members';
+			break;
+
+		case 'public' :
+			$access_setting = 'anyone';
+			break;
+	}
+
+	bp_docs_update_doc_access( $doc_id, $access_setting );
 }
 add_filter( 'bp_docs_doc_saved', 'bpdig_force_group_association', 5 );
 
