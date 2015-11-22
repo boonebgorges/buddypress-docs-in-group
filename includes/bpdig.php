@@ -138,6 +138,10 @@ function bpdig_filter_this_doc_slug( $slug, $query ) {
 add_filter( 'bp_docs_this_doc_slug', 'bpdig_filter_this_doc_slug', 100, 2 );
 
 function bpdig_filter_is_doc_edit( $is_doc_edit ) {
+	if ( ! bp_is_group() ) {
+		return $is_doc_edit;
+	}
+
 	if ( bp_is_action_variable( BP_DOCS_EDIT_SLUG, 1 ) ) {
 		$is_doc_edit = true;
 	}
@@ -146,6 +150,10 @@ function bpdig_filter_is_doc_edit( $is_doc_edit ) {
 }
 
 function bpdig_filter_is_doc_history( $is_doc_history ) {
+	if ( ! bp_is_group() ) {
+		return $is_doc_edit;
+	}
+
 	if ( bp_is_action_variable( BP_DOCS_HISTORY_SLUG, 1 ) ) {
 		$is_doc_history = true;
 	}
@@ -201,6 +209,10 @@ add_filter( 'bp_docs_is_single_doc', 'bpdig_is_existing_doc' );
  * bp_docs_is_doc_edit()
  */
 function bpdig_is_doc_edit( $is_doc_edit ) {
+	if ( ! bp_is_group() ) {
+		return $is_doc_edit;
+	}
+
 	if ( ! bp_docs_is_existing_doc() ) {
 		return $is_doc_edit;
 	}
