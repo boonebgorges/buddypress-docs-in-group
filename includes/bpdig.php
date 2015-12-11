@@ -35,6 +35,36 @@ function bpdig_redirect_away_from_cpt_urls() {
 add_action( 'template_redirect', 'bpdig_redirect_away_from_cpt_urls' );
 
 /**
+ * Catch and process Delete requests.
+ *
+ * buddypress-docs does this in a terrible way, using `get_queried_object()`. Should be fixed upstream, but until then,
+ * we'll override.
+ *
+ * Hooked at bp_actions:0 because buddypress-docs runs at bp_actions:1.
+ */
+function bpdig_catch_delete_request() {
+	if ( bp_is_group() && bp_docs_is_existing_doc() && ! empty( $_GET['delete'] ) ) {
+		check_admin_referer( 'bp_docs_delete' );
+
+		if ( current_user_can( 'bp_docs_manage' ) ) {
+			$current_doc = bp_docs_get_current_doc();
+
+			if ( bp_docs_trash_doc( $current_doc->ID ) ) {
+				bp_core_add_message( __( 'Doc successfully deleted!', 'bp-docs' ) );
+			} else {
+				bp_core_add_message( __( 'Could not delete doc.', 'bp-docs' ) );
+			}
+		} else {
+			bp_core_add_message( __( 'You do not have permission to delete that doc.', 'bp-docs' ), 'error' );
+		}
+
+		bp_core_redirect( bp_get_group_permalink( groups_get_current_group() ) . bp_docs_get_slug() );
+		die();
+	}
+}
+add_action( 'bp_actions', 'bpdig_catch_delete_request', 0 );
+
+/**
  * During theme compat, Docs does some juggling with get_queried_object().
  * In the Groups context, fetching content is more straightforward.
  */
