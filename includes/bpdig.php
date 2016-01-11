@@ -125,10 +125,12 @@ function bpdig_get_tag_link_url( $url, $args ) {
 		$base = bp_get_group_permalink( groups_get_current_group() ) . bp_docs_get_docs_slug() . '/';
 
 		// I HAVE NO IDEA WHAT IS HAPPENING HERE
-		foreach ( $args as $k => $v ) {
-			if ( 'tag' === $k ) {
-				$tag = $v;
-				break;
+		if ( is_array( $args ) ) {
+			foreach ( $args as $k => $v ) {
+				if ( 'tag' === $k ) {
+					$tag = $v;
+					break;
+				}
 			}
 		}
 
