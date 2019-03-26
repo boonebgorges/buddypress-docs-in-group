@@ -65,6 +65,44 @@ function bpdig_catch_delete_request() {
 add_action( 'bp_actions', 'bpdig_catch_delete_request', 0 );
 
 /**
+ * Short-circuit Docs's theme compat logic when viewing a Doc create page.
+ */
+function bpdig_disable_theme_compat( $theme_compat ) {
+	if ( ! bp_is_group() ) {
+		return;
+	}
+
+	foreach ( $GLOBALS['wp_filter']['bp_replace_the_content'] as $priority => $priority_cbs ) {
+		foreach ( $priority_cbs as $priority_cb ) {
+			if ( ! is_array( $priority_cb['function'] ) ) {
+				continue;
+			}
+
+			if ( ! ( $priority_cb['function'][0] instanceof BP_Docs_Theme_Compat ) ) {
+				continue;
+			}
+
+			remove_filter( 'bp_replace_the_content', $priority_cb['function'], $priority, $priority_cb['accepted_args'] );
+		}
+	}
+
+	foreach ( $GLOBALS['wp_filter']['bp_template_include_reset_dummy_post_data'] as $priority => $priority_cbs ) {
+		foreach ( $priority_cbs as $priority_cb ) {
+			if ( ! is_array( $priority_cb['function'] ) ) {
+				continue;
+			}
+
+			if ( ! ( $priority_cb['function'][0] instanceof BP_Docs_Theme_Compat ) ) {
+				continue;
+			}
+
+			remove_filter( 'bp_template_include_reset_dummy_post_data', $priority_cb['function'], $priority, $priority_cb['accepted_args'] );
+		}
+	}
+}
+add_action( 'bp_docs_setup_theme_compat', 'bpdig_disable_theme_compat' );
+
+/**
  * During theme compat, Docs does some juggling with get_queried_object().
  * In the Groups context, fetching content is more straightforward.
  */
