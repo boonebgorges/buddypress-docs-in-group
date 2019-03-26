@@ -234,8 +234,10 @@ function bpdig_is_existing_doc( $is_existing_doc ) {
 
 	return true;
 }
-add_filter( 'bp_docs_is_existing_doc', 'bpdig_is_existing_doc' );
-add_filter( 'bp_docs_is_single_doc', 'bpdig_is_existing_doc' );
+add_action( 'bp_before_group_plugin_template', function() {
+	add_filter( 'bp_docs_is_existing_doc', 'bpdig_is_existing_doc' );
+	add_filter( 'bp_docs_is_single_doc', 'bpdig_is_existing_doc' );
+} );
 
 /**
  * bp_docs_is_doc_edit()
@@ -263,7 +265,9 @@ function bpdig_is_doc_create( $is_doc_create ) {
 
 	return bp_is_action_variable( BP_DOCS_CREATE_SLUG, 0 );
 }
-add_filter( 'bp_docs_is_doc_create', 'bpdig_is_doc_create' );
+add_action( 'bp_before_group_plugin_template', function() {
+	add_filter( 'bp_docs_is_doc_create', 'bpdig_is_doc_create' );
+} );
 
 /**
  * Filter the doc used for implicit capability mapping.
