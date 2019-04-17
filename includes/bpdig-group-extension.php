@@ -4,6 +4,30 @@ class BPDIG_Group_Extension extends BP_Docs_Group_Extension {
 	// Override
 	public function url_backpat() {}
 
+	public function create_screen( $group_id = null ) {
+		parent::create_screen( $group_id );
+	}
+
+	public function create_screen_save( $group_id = null ) {
+		parent::create_screen_save( $group_id );
+	}
+
+	public function edit_screen( $group_id = null ) {
+		parent::edit_screen( $group_id );
+	}
+
+	public function edit_screen_save( $group_id = null ) {
+		parent::edit_screen_save( $group_id );
+	}
+
+	public function admin_screen( $group_id = null ) {
+		parent::admin_screen( $group_id );
+	}
+
+	public function admin_screen_save( $group_id = null ) {
+		parent::admin_screen_save( $group_id );
+	}
+
 	/**
 	 * Loads the display template
 	 *
