@@ -86,17 +86,20 @@ function bpdig_disable_theme_compat( $theme_compat ) {
 		}
 	}
 
-	foreach ( $GLOBALS['wp_filter']['bp_template_include_reset_dummy_post_data'] as $priority => $priority_cbs ) {
-		foreach ( $priority_cbs as $priority_cb ) {
-			if ( ! is_array( $priority_cb['function'] ) ) {
-				continue;
-			}
+	$cbs = isset( $GLOBALS['bp_template_include_reset_dummy_post_data'] ) ? $GLOBALS['bp_template_include_reset_dummy_post_data'] : null;
+	if ( $cbs ) {
+		foreach ( $cbs as $priority => $priority_cbs ) {
+			foreach ( $priority_cbs as $priority_cb ) {
+				if ( ! is_array( $priority_cb['function'] ) ) {
+					continue;
+				}
 
-			if ( ! ( $priority_cb['function'][0] instanceof BP_Docs_Theme_Compat ) ) {
-				continue;
-			}
+				if ( ! ( $priority_cb['function'][0] instanceof BP_Docs_Theme_Compat ) ) {
+					continue;
+				}
 
-			remove_filter( 'bp_template_include_reset_dummy_post_data', $priority_cb['function'], $priority, $priority_cb['accepted_args'] );
+				remove_filter( 'bp_template_include_reset_dummy_post_data', $priority_cb['function'], $priority, $priority_cb['accepted_args'] );
+			}
 		}
 	}
 }
