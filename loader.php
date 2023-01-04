@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: BuddyPress Docs In Group
-Version: 1.0.1
+Version: 1.0.2
 Description: Put Group Docs back in Groups
 Author: Boone Gorges
 Author URI: http://boone.gorg.es
