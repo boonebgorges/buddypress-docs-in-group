@@ -58,7 +58,7 @@ function bpdig_catch_delete_request() {
 			bp_core_add_message( __( 'You do not have permission to delete that doc.', 'bp-docs' ), 'error' );
 		}
 
-		bp_core_redirect( bp_get_group_permalink( groups_get_current_group() ) . bp_docs_get_slug() );
+		bp_core_redirect( bp_docs_get_group_docs_url( bp_get_current_group_id() ) );
 		die();
 	}
 }
@@ -138,7 +138,7 @@ function bpdig_filter_doc_link( $link, $doc_id ) {
 
 		$doc = get_post( $doc_id );
 
-		$link = bp_get_group_permalink( $group ) . bp_docs_get_docs_slug() . '/' . $doc->post_name . '/';
+		$link = bp_docs_get_group_docs_url( bp_get_current_group_id() ) . $doc->post_name . '/';
 	}
 
 	return $link;
@@ -153,8 +153,7 @@ function bpdig_get_create_link( $link ) {
 		return $link;
 	}
 
-	$link = bp_get_group_permalink( groups_get_current_group() ) . bp_docs_get_docs_slug() . '/' . BP_DOCS_CREATE_SLUG . '/';
-	return $link;
+	return bp_docs_get_group_docs_url( bp_get_current_group_id() ) . BP_DOCS_CREATE_SLUG . '/';
 }
 add_filter( 'bp_docs_get_create_link', 'bpdig_get_create_link', 1000 );
 
@@ -163,7 +162,7 @@ add_filter( 'bp_docs_get_create_link', 'bpdig_get_create_link', 1000 );
  */
 function bpdig_get_tag_link_url( $url, $args ) {
 	if ( bp_is_group() ) {
-		$base = bp_get_group_permalink( groups_get_current_group() ) . bp_docs_get_docs_slug() . '/';
+		$base = bp_docs_get_group_docs_url( bp_get_current_group_id() );
 
 		// I HAVE NO IDEA WHAT IS HAPPENING HERE
 		if ( is_array( $args ) ) {
@@ -243,7 +242,7 @@ function bpdig_filter_post_save_redirect_base( $redirect_base ) {
 	}
 
 	if ( bp_is_group() ) {
-		$redirect_base = bp_get_group_permalink( groups_get_current_group() ) . bp_docs_get_docs_slug() . '/';
+		$redirect_base = bp_docs_get_group_docs_url( bp_get_current_group_id() );
 	}
 
 	return $redirect_base;
@@ -354,9 +353,7 @@ function bpdig_protect_create_page() {
 	if ( bp_is_group() && bp_is_current_action( bp_docs_get_docs_slug() ) && bp_is_action_variable( BP_DOCS_CREATE_SLUG, 0 ) ) {
 		if ( ! current_user_can( 'bp_docs_associate_with_group', bp_get_current_group_id() ) ) {
 			bp_core_add_message( 'You do not have permission to do that.', 'error' );
-
-			$redirect = bp_get_group_permalink( groups_get_current_group() ) . bp_docs_get_docs_slug() . '/';
-			bp_core_redirect( $redirect );
+			bp_core_redirect( bp_docs_get_group_docs_url( bp_get_current_group_id() ) );
 			die();
 		}
 	}
