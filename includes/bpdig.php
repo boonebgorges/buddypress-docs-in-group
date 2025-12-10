@@ -132,13 +132,17 @@ add_filter( 'bp_docs_get_the_content', 'bpdig_filter_the_content' );
 function bpdig_filter_doc_link( $link, $doc_id ) {
 	$group_id = bp_docs_get_associated_group_id( $doc_id );
 	if ( ! empty( $group_id ) ) {
-		$group = groups_get_group( array(
-			'group_id' => $group_id,
-		) );
-
 		$doc = get_post( $doc_id );
+		if ( ! $doc || $doc->post_type !== bp_docs_get_post_type_name() ) {
+			return $link;
+		}
 
-		$link = bp_docs_get_group_docs_url( bp_get_current_group_id() ) . $doc->post_name . '/';
+		$group = groups_get_group( array( 'group_id' => $group_id ) );
+		if ( ! $group || is_wp_error( $group ) ) {
+			return $link;
+		}
+
+		$link = bp_docs_get_group_docs_url( $group ) . $doc->post_name . '/';
 	}
 
 	return $link;
