@@ -317,8 +317,15 @@ add_filter( 'bp_docs_is_doc_create', 'bpdig_is_doc_create' );
 
 /**
  * Filter the doc used for implicit capability mapping.
+ *
+ * Only applies to ID-less checks, such as current_user_can( 'bp_docs_read' ).
+ * When the caller names a Doc, that Doc must be the one checked.
  */
 function bpdig_get_doc_for_caps( $doc, $args ) {
+	if ( ! empty( $args[0] ) ) {
+		return $doc;
+	}
+
 	return bpdig_get_current_doc( $doc );
 }
 add_filter( 'bp_docs_get_doc_for_caps', 'bpdig_get_doc_for_caps', 10, 2 );
@@ -342,7 +349,8 @@ function bpdig_get_current_doc( $doc ) {
 	global $wpdb;
 	$doc_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'publish' AND post_name = %s LIMIT 1", bp_docs_get_post_type_name(), bp_action_variable( 0 ) ) );
 
-	if ( $doc_id ) {
+	// Only a Doc that belongs to the current group is reachable through the group's URLs.
+	if ( $doc_id && (int) bp_get_current_group_id() === (int) bp_docs_get_associated_group_id( $doc_id ) ) {
 		$_doc = get_post( $doc_id );
 	}
 
@@ -365,33 +373,43 @@ function bpdig_protect_create_page() {
 add_action( 'bp_screens', 'bpdig_protect_create_page' );
 
 /**
- * Force docs to be associated with the current group.
+ * Associate new Docs created in a group with that group.
+ *
+ * The Associated Group field is hidden (see 'bp_docs_allow_associated_group'
+ * above), so we supply its value for Docs created on a group's Create screen.
+ * BuddyPress Docs then handles the association as if the field had been
+ * submitted: it checks that the user can associate Docs with the group,
+ * associates the Doc only after a successful save, and gives the new Doc the
+ * group's default access settings (eg members-only in private and hidden
+ * groups).
+ *
+ * Existing Docs are left in their current group. Moving or making them public
+ * here would let anyone who can edit a Doc change its group and visibility,
+ * which BuddyPress Docs reserves for users who can manage the Doc.
+ *
+ * Runs at bp_actions:0, before BP_Docs_Component::catch_page_load() (bp_actions:1)
+ * verifies the request and saves the Doc.
+ *
+ * @since 1.0.6 Replaces bpdig_force_group_association(), which ran on 'bp_docs_doc_saved'.
  */
-function bpdig_force_group_association( $query ) {
-	$doc_id = $query->doc_id;
-
-	if ( ! bp_is_group() ) {
-		return $doc_id;
+function bpdig_set_group_for_new_doc() {
+	if ( empty( $_POST['doc-edit-submit'] ) && empty( $_POST['doc-edit-submit-continue'] ) ) {
+		return;
 	}
 
-	bp_docs_set_associated_group_id( $doc_id, bp_get_current_group_id() );
-
-	// Force the access settings, which will not have been passed in the $_POST.
-	$group = groups_get_current_group();
-	switch ( $group->status ) {
-		case 'private' :
-		case 'hidden' :
-			$access_setting = 'group-members';
-			break;
-
-		case 'public' :
-			$access_setting = 'anyone';
-			break;
+	if ( ! bp_is_group() || ! bp_is_current_action( bp_docs_get_docs_slug() ) ) {
+		return;
 	}
 
-	bp_docs_update_doc_access( $doc_id, $access_setting );
+	// New Docs only: no ID yet, or the auto-draft created when attachments are added on the Create screen.
+	$doc_id = isset( $_POST['doc_id'] ) ? absint( $_POST['doc_id'] ) : 0;
+	if ( $doc_id && 'auto-draft' !== get_post_status( $doc_id ) ) {
+		return;
+	}
+
+	$_POST['associated_group_id'] = bp_get_current_group_id();
 }
-add_filter( 'bp_docs_doc_saved', 'bpdig_force_group_association', 5 );
+add_action( 'bp_actions', 'bpdig_set_group_for_new_doc', 0 );
 
 /**
  * Parent dropdown should show only docs in the group.
